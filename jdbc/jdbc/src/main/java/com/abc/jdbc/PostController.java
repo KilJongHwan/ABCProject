@@ -54,11 +54,15 @@ public class PostController {
 
     @PostMapping("/add/comment")
     public String addComment(@RequestParam("pid") int postId,
-                             @RequestParam("mid") int memberId,
                              @RequestParam("content") String content,
                              HttpServletRequest request, Model model) {
-        commentsDAO.commentWrite(postId, memberId, content);
-        model.addAttribute("content", content);
+        String loggedInMember = getLoggedInMemberFromCookie(request);
+        if (loggedInMember != null){
+            int writeId = Integer.parseInt(loggedInMember);
+            commentsDAO.commentWrite(postId, writeId, content);
+            model.addAttribute("content", content);
+            model.addAttribute("memberId",writeId);
+        }
         // 댓글 작성 후 다시 해당 게시글 페이지로 리다이렉트
         return "redirect:/main/post/" + postId;
     }
