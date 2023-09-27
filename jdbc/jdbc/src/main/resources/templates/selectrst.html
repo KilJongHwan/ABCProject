@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>게시글 목록</title>
+    <style>
+        h1 {
+          position: relative;
+          padding: 0;
+          margin: 0;
+          font-family: "Raleway", sans-serif;
+          font-weight: 300;
+          font-size: 40px;
+          color: #080808;
+          -webkit-transition: all 0.4s ease 0s;
+          -o-transition: all 0.4s ease 0s;
+          transition: all 0.4s ease 0s;
+        }
+
+        h1 span {
+          display: block;
+          font-size: 0.5em;
+          line-height: 1.3;
+        }
+        h1 em {
+          font-style: normal;
+          font-weight: 600;
+        }
+        .nine h1 {
+              text-align:center; font-size:50px; text-transform:uppercase; color:#222; letter-spacing:1px;
+              font-family:"Playfair Display", serif; font-weight:400;
+            }
+            .nine h1 span {
+              margin-top: 5px;
+                font-size:15px; color:#444; word-spacing:1px; font-weight:normal; letter-spacing:2px;
+                text-transform: uppercase; font-family:"Raleway", sans-serif; font-weight:500;
+
+                display: grid;
+                grid-template-columns: 1fr max-content 1fr;
+                grid-template-rows: 27px 0;
+                grid-gap: 20px;
+                align-items: center;
+            }
+
+            .nine h1 span:after,.nine h1 span:before {
+                content: " ";
+                display: block;
+                border-bottom: 1px solid #ccc;
+                border-top: 1px solid #ccc;
+                height: 5px;
+              background-color:#f8f8f8;
+            }
+                     body {
+                      background: #cfd8dc;
+                      color: #37474f;
+                      font-weight: 400;
+                      font-size: 1em;
+                      font-family: 'Raleway', Arial, sans-serif;
+                    }
+                     nav ul {
+                     list-style: none; /* 목록 기호 제거 */
+                     margin: 0;
+                     padding: 0;
+                     }
+
+                     nav ul li {
+                     display: inline; /* 가로로 배치 */
+                     margin-right: 10px; /* 링크 사이 여백 설정 */
+                     }
+
+                     nav a {
+                     text-decoration: none; /* 밑줄 제거 */
+                     color: #333; /* 링크 텍스트 색상 설정 */
+                     font-weight: bold; /* 링크 텍스트 굵게 설정 */
+                     }
+
+                     nav a:hover {
+                     color: #555; /* 링크에 마우스를 올렸을 때 색상 변경 */
+                     }
+                     .post-list {
+                        max-width: 800px; /* 페이지의 최대 너비 설정 */
+                        margin: 0 auto; /* 가운데 정렬 */
+                        padding: 20px; /* 내용 주위에 여백 추가 */
+                        background-color: #f9f9f9; /* 배경색 설정 */
+                        border: 1px solid #ddd; /* 테두리 추가 */
+                        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); /* 그림자 효과 추가 */
+                    }
+                    .post-list ul {
+                        list-style: none; /* 목록 기호 제거 */
+                        padding-left: 0; /* 목록 기호의 왼쪽 여백 제거 */
+                    }
+                    .post-list li {
+                        margin-bottom: 20px; /* 게시글 사이 여백 설정 */
+                        border: 1px solid #ddd; /* 테두리 추가 */
+                        padding: 10px; /* 안쪽 여백 설정 */
+                        background-color: #f9f9f9; /* 배경색 설정 */
+                    }
+
+                    .post-list h2 {
+                        color: #333; /* 제목 텍스트 색상 설정 */
+                    }
+
+                    .post-list p {
+                        color: #555; /* 내용 텍스트 색상 설정 */
+                    }
+
+                    .post-list a {
+                        color: #007bff; /* "게시글 보기" 링크 색상 설정 */
+                        text-decoration: none; /* 밑줄 제거 */
+                        font-weight: bold; /* 링크 텍스트 굵게 설정 */
+                    }
+
+                    .post-list a:hover {
+                        color: #0056b3; /* 링크에 마우스를 올렸을 때 색상 변경 */
+                    }
+
+                    .dashboard {
+                        background-color: #f9f9f9; /* 배경색 설정 */
+                        border: 1px solid #ddd; /* 테두리 추가 */
+                        padding: 10px; /* 안쪽 여백 설정 */
+                        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); /* 그림자 효과 추가 */
+                        text-align: center; /* 텍스트 가운데 정렬 */
+                        float: left; /* 왼쪽으로 정렬 */
+                        margin-right: 10px; /* 오른쪽 여백 설정 (선택적으로 조정 가능) */
+                    }
+
+                    .dashboard h2 {
+                        color: #333; /* 제목 텍스트 색상 설정 */
+                    }
+
+                    .dashboard p {
+                        color: #555; /* 내용 텍스트 색상 설정 */
+                    }
+
+                    .dashboard a {
+                        color: #007bff; /* 링크 색상 설정 */
+                        text-decoration: none; /* 밑줄 제거 */
+                        font-weight: bold; /* 링크 텍스트 굵게 설정 */
+                    }
+
+                    .dashboard a:hover {
+                        color: #0056b3; /* 링크에 마우스를 올렸을 때 색상 변경 */
+                    }
+                                * {
+                     margin: 0;
+                     padding: 0;
+                     box-sizing: border-box;
+                    }
+                    @import url('https://fonts.googleapis.com/css2?family=Raleway:wght@400;700&display=swap');
+                    *{
+                        margin: 0;
+                        padding: 0;
+                        box-sizing: border-box;
+                    }
+                    a{
+                        position: relative;
+                        display: inline-block;
+                        padding: 25px 30px;
+                        margin: 40px 0;
+                        color: #03e9f4;
+                        text-decoration: none;
+                        text-transform: uppercase;
+                        transition: 0.5s;
+                        letter-spacing: 4px;
+                        overflow: hidden;
+                        margin-right: 50px;
+                    }
+                    a:hover{
+                            background: #03e9f4;
+                            color: #050801;
+                            box-shadow: 0 0 5px #03e9f4,
+                            0 0 25px #03e9f4,
+                            0 0 50px #03e9f4,
+                            0 0 200px #03e9f4;
+                             -webkit-box-reflect:below 1px linear-gradient(transparent, #0005);
+                    }
+                    a:nth-child(1){
+                        filter: hue-rotate(270deg);
+                    }
+                    a:nth-child(2){
+                        filter: hue-rotate(110deg);
+                    }
+                    a span{
+                        position: absolute;
+                        display: block;
+                    }
+                    a span:nth-child(1){
+                        top: 0;
+                        left: 0;
+                        width: 100%;
+                        height: 2px;
+                        background: linear-gradient(90deg,transparent,#03e9f4);
+                        animation: animate1 1s linear infinite;
+                    }
+                    @keyframes animate1{
+                        0%{
+                            left: -100%;
+                        }
+                        50%,100%{
+                            left: 100%;
+                        }
+                    }
+    </style>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<header>
+    <div class="nine">
+        <h1>ABC Community<span>website</span></h1>
+    </div>
+    <div class="wrap">
+    </div>
+</header>
+<nav>
+    <ul>
+        <section class="dashboard">
+            <h2>로그인 정보</h2>
+            <th:block th:if="${loggedInMember}">
+                <p>로그인한 사용자: <span th:text="${loggedInMember}"></span></p>
+                <form action="/members/logout" method="post">
+                    <input type="hidden" name="additionalData" value="value">
+                    <button type="submit">로그아웃</button>
+                </form>
+            </th:block>
+            <th:block th:unless="${loggedInMember}">
+                <a href="/members/login">로그인</a>
+            </th:block>
+        </section>
+    </ul>
+</nav>
+
+<main>
+    <section class="post-list">
+        <ul>
+            <li th:each="post : ${posts}">
+                <h2 th:text="${post.title}"></h2>
+                <p th:text="${post.content}"></p>
+                <p>작성자 ID: <span th:text="${post.membersID}"></span></p>
+                <p>좋아요 수: <span th:text="${post.likesCounts}"></span></p>
+                <a th:href="@{'/main/post/' + ${post.id}}">게시글 보기</a>
+            </li>
+        </ul>
+        <ul>
+            <li>
+                <a href="/insert/post">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                    게시물 작성
+                </a>
+            </li>
+        </ul>
+    </section>
+</main>
+
+<footer>
+    <p>&copy; ABC 커뮤니티 게시판</p>
+</footer>
+</body>
+</html>
+

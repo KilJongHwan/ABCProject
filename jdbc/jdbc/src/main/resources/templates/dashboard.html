@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>대시보드</title>
+</head>
+<body>
+<header>
+    <h1>대시보드</h1>
+</header>
+
+<main>
+    <section class="user-info">
+        <h2>로그인한 사용자 정보:</h2>
+        <p>user: <span th:text="${loggedInMember}"></span></p>
+    </section>
+
+    <section class="dashboard-features">
+        <h2>대시보드 기능:</h2>
+    </section>
+</main>
+<footer>
+    <p>&copy; ABC 커뮤니티 게시판</p>
+</footer>
+</body>
+</html>

@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${post.title} + '번 방'">게시글</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        h1 {
+           position: relative;
+           padding: 0;
+           margin: 0;
+           font-family: "Raleway", sans-serif;
+           font-weight: 300;
+           font-size: 40px;
+           color: #080808;
+           -webkit-transition: all 0.4s ease 0s;
+           -o-transition: all 0.4s ease 0s;
+           transition: all 0.4s ease 0s;
+         }
+
+         h1 span {
+           display: block;
+           font-size: 0.5em;
+           line-height: 1.3;
+         }
+         h1 em {
+           font-style: normal;
+           font-weight: 600;
+         }
+         .nine h1 {
+               text-align:center; font-size:50px; text-transform:uppercase; color:#222; letter-spacing:1px;
+               font-family:"Playfair Display", serif; font-weight:400;
+             }
+             .nine h1 span {
+               margin-top: 5px;
+                 font-size:15px; color:#444; word-spacing:1px; font-weight:normal; letter-spacing:2px;
+                 text-transform: uppercase; font-family:"Raleway", sans-serif; font-weight:500;
+
+                 display: grid;
+                 grid-template-columns: 1fr max-content 1fr;
+                 grid-template-rows: 27px 0;
+                 grid-gap: 20px;
+                 align-items: center;
+             }
+
+             .nine h1 span:after,.nine h1 span:before {
+                 content: " ";
+                 display: block;
+                 border-bottom: 1px solid #ccc;
+                 border-top: 1px solid #ccc;
+                 height: 5px;
+               background-color:#f8f8f8;
+             }
+      .post-details {
+          max-width: 800px; /* 페이지의 최대 너비 설정 */
+          margin: 0 auto; /* 가운데 정렬 */
+          padding: 20px; /* 내용 주위에 여백 추가 */
+          background-color: #f9f9f9; /* 페이지 배경색 설정 */
+          border: 1px solid #ddd; /* 테두리 추가 */
+          box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); /* 그림자 효과 추가 */
+      }
+
+      .post-details h2 {
+          color: #333; /* 제목 텍스트 색상 설정 */
+      }
+
+      .post-details p {
+          color: #555; /* 내용 텍스트 색상 설정 */
+      }
+
+      .post-details a {
+          color: #007bff; /* 링크 색상 설정 */
+          text-decoration: none; /* 밑줄 제거 */
+          font-weight: bold; /* 링크 텍스트 굵게 설정 */
+      }
+
+      .post-details a:hover {
+          color: #0056b3; /* 링크에 마우스를 올렸을 때 색상 변경 */
+      }
+
+      .post-details h3 {
+          margin-top: 20px; /* 제목 위 여백 설정 */
+      }
+
+      .post-details ul {
+          list-style: none; /* 목록 기호 제거 */
+          padding: 0; /* 내부 여백 제거 */
+      }
+
+      .post-details li {
+          margin-bottom: 20px; /* 리스트 아이템 아래 여백 설정 */
+          border: 1px solid #ddd; /* 테두리 추가 */
+          padding: 10px; /* 내부 여백 설정 */
+          background-color: #f9f9f9; /* 배경색 설정 */
+      }
+
+      .post-details form {
+          margin-top: 20px; /* 폼 위 여백 설정 */
+      }
+
+      .post-details textarea {
+          width: 100%; /* 텍스트 입력 필드 너비 100% 설정 */
+          padding: 10px; /* 내부 여백 설정 */
+          margin-bottom: 10px; /* 아래 여백 설정 */
+          border: 1px solid #ccc; /* 테두리 설정 */
+          border-radius: 4px; /* 모서리 둥글게 설정 */
+      }
+
+      .post-details button[type="submit"] {
+          padding: 10px 20px; /* 버튼 내부 여백 설정 */
+          background-color: #007bff; /* 버튼 배경색 설정 */
+          color: #fff; /* 버튼 텍스트 색상 설정 */
+          border: none; /* 버튼 테두리 제거 */
+          border-radius: 4px; /* 모서리 둥글게 설정 */
+          cursor: pointer; /* 커서를 포인터로 변경하여 클릭 가능한 상태 표시 */
+      }
+
+      .post-details button[type="submit"]:hover {
+          background-color: #0056b3; /* 버튼에 마우스를 올렸을 때 배경색 변경 */
+      }
+         @import url('https://fonts.googleapis.com/css2?family=Raleway:wght@400;700&display=swap');
+             *{
+                 margin: 0;
+                 padding: 0;
+                 box-sizing: border-box;
+             }
+             a{
+                 position: relative;
+                 display: inline-block;
+                 padding: 25px 30px;
+                 margin: 40px 0;
+                 color: #03e9f4;
+                 text-decoration: none;
+                 text-transform: uppercase;
+                 transition: 0.5s;
+                 letter-spacing: 4px;
+                 overflow: hidden;
+                 margin-right: 50px;
+             }
+             a:hover{
+                     background: #03e9f4;
+                     color: #050801;
+                     box-shadow: 0 0 5px #03e9f4,
+                     0 0 25px #03e9f4,
+                     0 0 50px #03e9f4,
+                     0 0 200px #03e9f4;
+                      -webkit-box-reflect:below 1px linear-gradient(transparent, #0005);
+             }
+             a:nth-child(1){
+                 filter: hue-rotate(270deg);
+             }
+             a:nth-child(2){
+                 filter: hue-rotate(110deg);
+             }
+             a span{
+                 position: absolute;
+                 display: block;
+             }
+             a span:nth-child(1){
+                 top: 0;
+                 left: 0;
+                 width: 100%;
+                 height: 2px;
+                 background: linear-gradient(90deg,transparent,#03e9f4);
+                 animation: animate1 1s linear infinite;
+             }
+             @keyframes animate1{
+                 0%{
+                     left: -100%;
+                 }
+                 50%,100%{
+                     left: 100%;
+                 }
+             }
+    </style>
+</head>
+<body>
+<header>
+        <div class="nine">
+            <h1 th:text="${post.title}"><span>post</span> </h1>
+        </div>
+        <div class="wrap">
+        </div>
+</header>
+
+<main>
+    <section class="post-details" th:if="${post != null}">
+        <h2 th:text="${post.title}"></h2>
+        <p th:text="${post.content}"></p>
+        <p>작성자 NAME: <span th:text="${post.membersID}"></span></p>
+        <p>작성일시: <span th:text="${post.currentTime}"></span></p>
+        <p>좋아요 수: <span th:text="${post.likesCounts}"></span></p>
+        <form action="/main/add/like" method="post">
+            <input type="hidden" name="postId" th:value="${post.id}">
+            <button type="submit">좋아요</button>
+        </form>
+        <a href="/main/post">뒤로 가기</a>
+
+
+        <h3>댓글 목록</h3>
+        <ul th:if="${comments}">
+            <li th:each="comment : ${comments}">
+                <p th:text="${comment.commentsText}"></p>
+                <p>작성자: <span th:text="${comment.memberId}"></span></p>
+                <p>작성일시: <span th:text="${comment.currentTime}"></span></p>
+            </li>
+        </ul>
+        <p th:unless="${comments}">댓글이 없습니다.</p>
+
+        <h3>댓글 작성</h3>
+        <form action="/main/add/comment" method="post">
+            <input type="hidden" name="pid" th:value="${post.id}">
+            <input type="hidden" name="mid" th:value="${post.membersID}">
+            <textarea name="content" placeholder="댓글을 입력하세요"></textarea>
+            <button type="submit">댓글 작성</button>
+        </form>
+    </section>
+
+</main>
+<footer>
+    <p>&copy; ABC 커뮤니티 게시판</p>
+</footer>
+</body>
+</html>
