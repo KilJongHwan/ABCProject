@@ -1,0 +1,148 @@
+GRANT CREATE SEQUENCE TO ABC; --관리자 계정에서 실행
+
+-- Members (ID) 시퀀스 생성
+CREATE SEQUENCE ID_seq START WITH 1 INCREMENT BY 1;
+
+-- PostsID 시퀀스 생성
+CREATE SEQUENCE PostsID_seq START WITH 1 INCREMENT BY 1;
+
+-- LikesID 시퀀스 생성
+CREATE SEQUENCE LikesID_seq START WITH 1 INCREMENT BY 1;
+
+-- CommentsID 시퀀스 생성
+CREATE SEQUENCE CommentsID_seq START WITH 1 INCREMENT BY 1;
+
+GRANT RESOURCE TO ABC; --테이블 생성 권한 부여
+GRANT TABLE TO ABC; --테이블 생성 권한 부여
+GRANT UNLIMITED TABLESPACE TO ABC; --관리자 계정에서 실행
+
+
+-- Members 테이블 생성
+CREATE TABLE Members (
+    ID INT PRIMARY KEY,
+    Password VARCHAR2(255) NOT NULL,
+    Name VARCHAR2(255) NOT NULL
+);
+
+-- Members 트리거 생성
+CREATE OR REPLACE TRIGGER ID_trigger
+BEFORE INSERT ON Members
+FOR EACH ROW
+BEGIN
+    SELECT ID_seq.NEXTVAL INTO :NEW.ID FROM DUAL;
+END;
+
+GRANT SELECT ON ID_SEQ TO ABC; --시퀸스 SELECT 권한 ABC에 부여
+
+GRANT CREATE TRIGGER TO ABC; -- ABC계정에 트리거 생성 권한 부여
+
+
+-- PostsID 시퀀스 생성
+CREATE SEQUENCE PostsID_seq START WITH 1 INCREMENT BY 1;
+
+-- 테이블 생성
+CREATE TABLE Posts (
+    ID NUMBER(10) PRIMARY KEY,
+    Title VARCHAR2(255) NOT NULL,
+    CurrentTime TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    Content CLOB,
+    MembersID NUMBER(10),
+    LikesCounts NUMBER(5) DEFAULT 0,
+    CONSTRAINT fk_Posts_Members FOREIGN KEY (MembersID) REFERENCES Members(ID)
+);
+
+-- 트리거 생성
+CREATE OR REPLACE TRIGGER Posts_trigger
+BEFORE INSERT ON Posts
+FOR EACH ROW
+BEGIN
+    SELECT PostsID_seq.NEXTVAL INTO :NEW.ID FROM DUAL;
+END;
+
+-- Likes 테이블 생성
+CREATE TABLE Likes (
+    ID NUMBER(10) PRIMARY KEY,
+    PostsID NUMBER(10) NOT NULL,
+    MembersID NUMBER(10) NOT NULL,
+    CONSTRAINT fk_Likes_Posts FOREIGN KEY (PostsID) REFERENCES Posts(ID),
+    CONSTRAINT fk_Likes_Members FOREIGN KEY (MembersID) REFERENCES Members(ID)
+);
+
+-- 트리거 생성
+CREATE OR REPLACE TRIGGER Likes_trigger
+BEFORE INSERT ON Likes
+FOR EACH ROW
+BEGIN
+    SELECT LikesID_seq.NEXTVAL INTO :NEW.ID FROM DUAL;
+END;
+
+
+-- Comments 테이블 생성
+CREATE TABLE Comments (
+    ID NUMBER(10) PRIMARY KEY,
+    PostsID NUMBER(10),
+    MembersID NUMBER(10),
+    CommentsText CLOB,
+    CommentsTime TIMESTAMP DEFAULT SYSTIMESTAMP,
+    CONSTRAINT fk_Comments_Posts FOREIGN KEY (PostsID) REFERENCES Posts(ID),
+    CONSTRAINT fk_Comments_Members FOREIGN KEY (MembersID) REFERENCES Members(ID)
+);
+
+-- 트리거 생성
+CREATE OR REPLACE TRIGGER Comments_trigger
+BEFORE INSERT ON Comments
+FOR EACH ROW
+BEGIN
+    SELECT CommentsID_seq.NEXTVAL INTO :NEW.ID FROM DUAL;
+END;
+
+-- 트리거 생성
+
+-- UPDAE_COMMENTS_NAME
+create or replace TRIGGER Updae_Comments_Name
+BEFORE INSERT ON COMMENTS
+FOR EACH ROW
+DECLARE
+    v_members_name members.name%TYPE;
+BEGIN
+    -- 회원 테이블에서 해당 회원의 이름을 가져옵니다.
+    SELECT name INTO v_members_name FROM members WHERE id = :NEW.membersid;
+
+    -- 댓글 NAME 속성을 회원의 이름으로 설정합니다.
+    :NEW.name := v_members_name;
+END;
+
+-- likes count 업데이트 추가
+
+-- UPDATE_LIKES_COUNT
+create or replace TRIGGER Update_Likes_Count
+AFTER INSERT OR DELETE ON LIKES
+DECLARE
+    TYPE t_likes IS TABLE OF likes.postsid%TYPE INDEX BY PLS_INTEGER;
+    v_likes t_likes;
+BEGIN
+    SELECT postsid BULK COLLECT INTO v_likes FROM likes;
+
+    FORALL i IN 1.. v_likes.COUNT
+        UPDATE posts
+        SET likescounts = (SELECT COUNT(*) FROM likes WHERE postsid = v_likes(i))
+        WHERE id = v_likes(i);
+    END;
+
+
+
+-- UPDATE_POST_NAME
+create or replace TRIGGER Update_Post_Name
+BEFORE INSERT OR UPDATE ON POSTS
+FOR EACH ROW
+BEGIN
+    -- NEW.MEMBERSID를 사용하여 MEMBERS 테이블에서 NAME 값을 가져옵니다.
+    SELECT NAME INTO :NEW.NAME
+    FROM MEMBERS
+    WHERE ID = :NEW.MEMBERSID;
+
+    EXCEPTION
+    -- 예외 처리 코드 추가 (멤버를 찾지 못한 경우에 대한 처리)
+    WHEN NO_DATA_FOUND THEN
+        :NEW.NAME := NULL;  -- 혹은 다른 기본값 또는 오류 처리 방법을 선택합니다.
+    END;

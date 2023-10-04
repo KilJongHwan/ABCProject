@@ -58,8 +58,13 @@ public class PostController {
         String loggedInMember = getLoggedInMemberFromCookie(request);
         PostsDTO post = postsDAO.getPostById(postId);
 
+        if (loggedInMember == null) {
+            // 로그인하지 않은 사용자에 대한 예외 처리
+            return "redirect:/login";
+        }
+
         // 게시물 작성자와 로그인한 사용자가 같은 경우에만 수정 페이지로 이동
-        if (post != null && loggedInMember != null && loggedInMember.equals(post.getMembersID())) {
+        if (loggedInMember.equals(post.getMembersID())) {
             model.addAttribute("post", post);
             return "modifypost";
         } else {
