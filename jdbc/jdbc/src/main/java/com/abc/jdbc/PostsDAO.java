@@ -102,44 +102,108 @@ public class PostsDAO {
         return membersDTO;
     }
     // 게시글 수정
-    public void modifyPost(PostsDTO postsDTO, int postID, String memberID, String newTitle) {
-        String sql = "update posts set title = ? WHERE id = ? and membersid = ?";
-        try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
-            postsDTO.setId(String.valueOf(postID)); // 현재 선택된 게시글
-            postsDTO.setMembersID(memberID); // 현재 로그인한 회원
-            postsDTO.setTitle(newTitle);
-            preparedStatement.setString(1, postsDTO.getTitle());
-            preparedStatement.setString(2, postsDTO.getId());
-            preparedStatement.setString(3, postsDTO.getMembersID());
-            preparedStatement.executeUpdate();
-            int rowsUpdated = preparedStatement.executeUpdate();
-            if (rowsUpdated > 0) {
-                System.out.println("게시글 제목이 성공적으로 수정되었습니다.");
-            } else {
-                System.out.println("게시글 제목 수정에 실패했습니다.");
+//    public void modifyTitle(PostsDTO postsDTO, int postID, String memberID, String newTitle) {
+//        String sql = "update posts set title = ? WHERE id = ? and membersid = ?";
+//        try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
+//            postsDTO.setId(String.valueOf(postID)); // 현재 선택된 게시글
+//            postsDTO.setMembersID(memberID); // 현재 로그인한 회원
+//            postsDTO.setTitle(newTitle);
+//            preparedStatement.setString(1, postsDTO.getTitle());
+//            preparedStatement.setString(2, postsDTO.getId());
+//            preparedStatement.setString(3, postsDTO.getMembersID());
+//            preparedStatement.executeUpdate();
+//            int rowsUpdated = preparedStatement.executeUpdate();
+//            if (rowsUpdated > 0) {
+//                System.out.println("게시글 제목이 성공적으로 수정되었습니다.");
+//            } else {
+//                System.out.println("게시글 제목 수정에 실패했습니다.");
+//            }
+//        } catch (Exception e) {
+//            System.out.println("PostsDAO modifyTitle: " + e);
+//        }
+//    }
+//    public void modifyContent(PostsDTO postsDTO, int postID, String memberID, String newContent){
+//        String sql = "update posts set content = ? WHERE id = ? and membersid = ?";
+//        try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
+//            postsDTO.setId(String.valueOf(postID)); // 현재 선택된 게시글
+//            postsDTO.setMembersID(memberID); // 현재 로그인한 회원
+//            postsDTO.setContent(newContent);
+//            preparedStatement.setString(1, postsDTO.getContent());
+//            preparedStatement.setString(2, postsDTO.getId());
+//            preparedStatement.setString(3, postsDTO.getMembersID());
+//            preparedStatement.executeUpdate();
+//            int rowsUpdated = preparedStatement.executeUpdate();
+//            if (rowsUpdated > 0) {
+//                System.out.println("게시글 내용이 성공적으로 수정되었습니다.");
+//            } else {
+//                System.out.println("게시글 내용 수정에 실패했습니다.");
+//            }
+//        } catch (Exception e) {
+//            System.out.println("PostsDAO modifyTitle: " + e);
+//        }
+//    }
+    public PostsDTO getPostById(int postId) {
+        String sql = "SELECT * FROM POSTS WHERE ID = ?";
+        try (Connection connection = Common.getConnection();
+             PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
+            preparedStatement.setInt(1, postId);
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                if (resultSet.next()) {
+                    PostsDTO post = new PostsDTO();
+                    post.setId(resultSet.getString("ID"));
+                    post.setTitle(resultSet.getString("TITLE"));
+                    post.setContent(resultSet.getString("CONTENT"));
+                    post.setMembersID(resultSet.getString("MEMBERSID"));
+                    post.setLikesCounts(resultSet.getString("LIKESCOUNTS"));
+                    return post;
+                }
             }
-        } catch (Exception e) {
-            System.out.println("PostsDAO modifyTitle: " + e);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null; // 게시물이 없는 경우
+    }
+    public void modifyTitleAndContent(int postID, String memberID, String newTitle, String newContent) {
+        String updateTitleSQL = "UPDATE posts SET title = ? WHERE id = ? AND membersid = ?";
+        String updateContentSQL = "UPDATE posts SET content = ? WHERE id = ? AND membersid = ?";
+
+        try (PreparedStatement titleStatement = connection.prepareStatement(updateTitleSQL);
+             PreparedStatement contentStatement = connection.prepareStatement(updateContentSQL)) {
+
+            titleStatement.setString(1, newTitle);
+            titleStatement.setInt(2, postID);
+            titleStatement.setString(3, memberID);
+
+            contentStatement.setString(1, newContent);
+            contentStatement.setInt(2, postID);
+            contentStatement.setString(3, memberID);
+
+            connection.setAutoCommit(false); // 트랜잭션 시작
+            int titleRowsUpdated = titleStatement.executeUpdate();
+            int contentRowsUpdated = contentStatement.executeUpdate();
+
+            if (titleRowsUpdated > 0 && contentRowsUpdated > 0) {
+                connection.commit(); // 모든 업데이트가 성공하면 커밋
+                System.out.println("게시글 제목과 내용이 성공적으로 수정되었습니다.");
+            } else {
+                connection.rollback(); // 업데이트 중 하나라도 실패하면 롤백
+                System.out.println("게시글 제목 또는 내용 수정에 실패했습니다.");
+            }
+        } catch (SQLException e) {
+            try {
+                connection.rollback(); // 예외 발생 시 롤백
+            } catch (SQLException rollbackException) {
+                System.out.println("Rollback 실패: " + rollbackException);
+            }
+            System.out.println("게시글 수정 중 오류 발생: " + e);
+        } finally {
+            try {
+                connection.setAutoCommit(true); // 트랜잭션 종료 후 다시 자동 커밋으로 설정
+            } catch (SQLException autoCommitException) {
+                System.out.println("Auto-commit 설정 실패: " + autoCommitException);
+            }
         }
     }
-    public void modifyContent(PostsDTO postsDTO, int postID, String memberID, String newContent){
-        String sql = "update posts set content = ? WHERE id = ? and membersid = ?";
-        try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
-            postsDTO.setId(String.valueOf(postID)); // 현재 선택된 게시글
-            postsDTO.setMembersID(memberID); // 현재 로그인한 회원
-            postsDTO.setContent(newContent);
-            preparedStatement.setString(1, postsDTO.getContent());
-            preparedStatement.setString(2, postsDTO.getId());
-            preparedStatement.setString(3, postsDTO.getMembersID());
-            preparedStatement.executeUpdate();
-            int rowsUpdated = preparedStatement.executeUpdate();
-            if (rowsUpdated > 0) {
-                System.out.println("게시글 내용이 성공적으로 수정되었습니다.");
-            } else {
-                System.out.println("게시글 내용 수정에 실패했습니다.");
-            }
-        } catch (Exception e) {
-            System.out.println("PostsDAO modifyTitle: " + e);
-        }
-    }
+
+
 }
