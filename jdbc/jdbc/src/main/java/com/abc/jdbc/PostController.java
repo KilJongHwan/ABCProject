@@ -72,7 +72,7 @@ public class PostController {
         }
     }
     @PostMapping("/edit/{postId}/complete")
-    public String editComplete(@RequestParam("pid") int postId,
+    public String editComplete(@RequestParam("postId") int postId,
                                @RequestParam("title") String title,
                                @RequestParam("content") String content,
                                HttpServletRequest request, Model model) {
@@ -88,6 +88,8 @@ public class PostController {
 
         return "selectrst";
     }
+
+
 
     @PostMapping("/add/comment")
     public String addComment(@RequestParam("pid") int postId,
