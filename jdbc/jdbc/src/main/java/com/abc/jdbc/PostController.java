@@ -52,6 +52,36 @@ public class PostController {
         return "postroom"; // postroom.html 페이지로 이동
     }
 
+    // 게시물 수정 페이지로 이동
+    @GetMapping("/edit/{postId}")
+    public String editPost(@PathVariable int postId, Model model, HttpServletRequest request) {
+        String loggedInMember = getLoggedInMemberFromCookie(request);
+        PostsDTO post = postsDAO.getPostById(postId);
+
+        // 게시물 작성자와 로그인한 사용자가 같은 경우에만 수정 페이지로 이동
+        if (post != null && loggedInMember != null && loggedInMember.equals(post.getMembersID())) {
+            model.addAttribute("post", post);
+            return "modifypost";
+        } else {
+            return "redirect:/main/post/" + postId;
+        }
+    }
+    @PostMapping("/edit/{postId}/complete")
+    public String editComplete(@RequestParam("pid") int postId,
+                               @RequestParam("title") String title,
+                               @RequestParam("content") String content,
+                               HttpServletRequest request, Model model)
+    {
+        String loggedInMember = getLoggedInMemberFromCookie(request);
+        PostsDTO dto = new PostsDTO();
+        postsDAO.modifyTitle(dto, postId, loggedInMember, title);
+        model.addAttribute("title", title);
+        postsDAO.modifyContent(dto,postId, loggedInMember, content);
+        model.addAttribute("content", content);
+        return "selectrst";
+    }
+
+
     @PostMapping("/add/comment")
     public String addComment(@RequestParam("pid") int postId,
                              @RequestParam("content") String content,

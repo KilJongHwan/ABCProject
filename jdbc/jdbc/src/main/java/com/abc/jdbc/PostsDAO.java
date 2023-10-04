@@ -102,7 +102,7 @@ public class PostsDAO {
         return membersDTO;
     }
     // 게시글 수정
-    public void modifyPost(PostsDTO postsDTO, int postID, String memberID, String newTitle) {
+    public void modifyTitle(PostsDTO postsDTO, int postID, String memberID, String newTitle) {
         String sql = "update posts set title = ? WHERE id = ? and membersid = ?";
         try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
             postsDTO.setId(String.valueOf(postID)); // 현재 선택된 게시글
@@ -142,4 +142,26 @@ public class PostsDAO {
             System.out.println("PostsDAO modifyTitle: " + e);
         }
     }
+    public PostsDTO getPostById(int postId) {
+        String sql = "SELECT * FROM POSTS WHERE ID = ?";
+        try (Connection connection = Common.getConnection();
+             PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
+            preparedStatement.setInt(1, postId);
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                if (resultSet.next()) {
+                    PostsDTO post = new PostsDTO();
+                    post.setId(resultSet.getString("ID"));
+                    post.setTitle(resultSet.getString("TITLE"));
+                    post.setContent(resultSet.getString("CONTENT"));
+                    post.setMembersID(resultSet.getString("MEMBERSID"));
+                    post.setLikesCounts(resultSet.getString("LIKESCOUNTS"));
+                    return post;
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null; // 게시물이 없는 경우
+    }
+
 }
