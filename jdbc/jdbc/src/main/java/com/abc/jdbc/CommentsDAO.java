@@ -68,34 +68,6 @@ public class CommentsDAO {
         }
     }
 
-    //    public void commentModify() {
-//        String sql = "UPDATE COMMENTS SET COMMENTSTEXT = ? WHERE ID = ?";
-//        try {
-//            conn = DatabaseConnection.getConnection();
-//            pst = conn.prepareStatement(sql);
-//
-//            System.out.print("수정할 댓글 번호를 선택하세요: ");
-//            int modCommentId = sc.nextInt();
-//            System.out.print("수정할 내용을 입력하세요: ");
-//            String modComment = sc.next();
-//            sc.nextLine();
-//            pst.setString(1, modComment);
-//            pst.setInt(2, modCommentId);
-//            int rowsUpdated = pst.executeUpdate();
-//
-//            if (rowsUpdated > 0) {
-//                System.out.println("댓글이 성공적으로 수정되었습니다.");
-//            } else {
-//                System.out.println("댓글 수정에 실패했습니다.");
-//            }
-//        } catch (Exception e) {
-//            System.out.println("댓글 수정 오류: " + e);
-//        } finally {
-//            DatabaseConnection.close(pst);
-//            DatabaseConnection.close(conn);
-//        }
-//    }
-
     public void commentModify(int modCommentId, String modComment) {
         String sql = "UPDATE COMMENTS SET COMMENTSTEXT = ? WHERE ID = ?";
         conn = Common.getConnection();
