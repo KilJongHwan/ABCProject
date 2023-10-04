@@ -239,7 +239,7 @@
                 <p>작성자 ID: <span th:text="${post.membersID}"></span></p>
                 <p>좋아요 수: <span th:text="${post.likesCounts}"></span></p>
                 <a th:href="@{'/main/post/' + ${post.id}}">게시글 보기</a>
-                <a th:if="${loggedInMember == post.membersID}" th:href="@{'/main/edit/' + ${post.id} + '?loggedInMember=' + ${loggedInMember}}">게시물 수정</a>
+                <a th:if="${loggedInMember == post.membersID}" th:href="@{'/main/edit/' + ${post.id}}">게시물 수정</a>
             </li>
         </ul>
         <ul>
