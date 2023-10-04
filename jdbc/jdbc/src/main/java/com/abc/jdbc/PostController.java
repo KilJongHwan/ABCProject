@@ -66,21 +66,6 @@ public class PostController {
             return "redirect:/main/post/" + postId;
         }
     }
-//    @PostMapping("/edit/{postId}/complete")
-//    public String editComplete(@RequestParam("pid") int postId,
-//                               @RequestParam("title") String title,
-//                               @RequestParam("content") String content,
-//                               HttpServletRequest request, Model model)
-//    {
-//        String loggedInMember = getLoggedInMemberFromCookie(request);
-//        PostsDTO dto = new PostsDTO();
-//        postsDAO.modifyTitle(dto, postId, loggedInMember, title);
-//        model.addAttribute("title", title);
-//        postsDAO.modifyContent(dto,postId, loggedInMember, content);
-//        model.addAttribute("content", content);
-//        return "selectrst";
-//    }
-
     @PostMapping("/edit/{postId}/complete")
     public String editComplete(@RequestParam("pid") int postId,
                                @RequestParam("title") String title,
