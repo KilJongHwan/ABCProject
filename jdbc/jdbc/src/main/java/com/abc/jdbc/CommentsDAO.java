@@ -88,6 +88,25 @@ public class CommentsDAO {
         }
     }
 
+    public void commentDelete(CommentsDTO commentsDTO, int id){
+        String sql = "DELETE FROM COMMENTS WHERE ID = ?";
+        try (PreparedStatement preparedStatement = Common.getConnection().prepareStatement(sql)) {
+            commentsDTO.setId(id);
+            preparedStatement.setString(1, String.valueOf(commentsDTO.getId()));
+            int rowsAffected = preparedStatement.executeUpdate(); // 실행된 행의 수를 반환
+            if (rowsAffected == 0) {
+                // 삭제된 행이 없는 경우
+                System.out.println("해당 번호의 댓글이 존재하지 않습니다.");
+            } else {
+                // 삭제 작업이 성공적으로 수행된 경우
+                System.out.println("댓글이 성공적으로 삭제되었습니다.");
+            }
+            preparedStatement.executeUpdate();
+        } catch (Exception e) {
+            System.out.println("CommentDAO commentDelete : " + e);
+        }
+    }
+
 
 
     public List<CommentsDTO> postList() {

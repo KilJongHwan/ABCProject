@@ -101,5 +101,45 @@ public class PostsDAO {
 
         return membersDTO;
     }
-
+    // 게시글 수정
+    public void modifyPost(PostsDTO postsDTO, int postID, String memberID, String newTitle) {
+        String sql = "update posts set title = ? WHERE id = ? and membersid = ?";
+        try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
+            postsDTO.setId(String.valueOf(postID)); // 현재 선택된 게시글
+            postsDTO.setMembersID(memberID); // 현재 로그인한 회원
+            postsDTO.setTitle(newTitle);
+            preparedStatement.setString(1, postsDTO.getTitle());
+            preparedStatement.setString(2, postsDTO.getId());
+            preparedStatement.setString(3, postsDTO.getMembersID());
+            preparedStatement.executeUpdate();
+            int rowsUpdated = preparedStatement.executeUpdate();
+            if (rowsUpdated > 0) {
+                System.out.println("게시글 제목이 성공적으로 수정되었습니다.");
+            } else {
+                System.out.println("게시글 제목 수정에 실패했습니다.");
+            }
+        } catch (Exception e) {
+            System.out.println("PostsDAO modifyTitle: " + e);
+        }
+    }
+    public void modifyContent(PostsDTO postsDTO, int postID, String memberID, String newContent){
+        String sql = "update posts set content = ? WHERE id = ? and membersid = ?";
+        try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
+            postsDTO.setId(String.valueOf(postID)); // 현재 선택된 게시글
+            postsDTO.setMembersID(memberID); // 현재 로그인한 회원
+            postsDTO.setContent(newContent);
+            preparedStatement.setString(1, postsDTO.getContent());
+            preparedStatement.setString(2, postsDTO.getId());
+            preparedStatement.setString(3, postsDTO.getMembersID());
+            preparedStatement.executeUpdate();
+            int rowsUpdated = preparedStatement.executeUpdate();
+            if (rowsUpdated > 0) {
+                System.out.println("게시글 내용이 성공적으로 수정되었습니다.");
+            } else {
+                System.out.println("게시글 내용 수정에 실패했습니다.");
+            }
+        } catch (Exception e) {
+            System.out.println("PostsDAO modifyTitle: " + e);
+        }
+    }
 }
