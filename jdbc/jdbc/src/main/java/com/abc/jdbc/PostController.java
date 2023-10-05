@@ -26,18 +26,6 @@ public class PostController {
         return "selectrst";
     }
 
-    private String getLoggedInMemberFromCookie(HttpServletRequest request) {
-        Cookie[] cookies = request.getCookies();
-        if (cookies != null) {
-            for (Cookie cookie : cookies) {
-                if ("loggedInMember".equals(cookie.getName())) {
-                    return cookie.getValue();
-                }
-            }
-        }
-        return null;
-    }
-
     @GetMapping("/post/{postId}") // URL 패턴 변경
     public String enterPost(@PathVariable("postId") Integer postId, Model model) {
         PostsDTO post = postsDAO.enterPost(postId);
@@ -136,5 +124,17 @@ public class PostController {
             // 로그인되지 않은 경우 로그인 페이지로 리디렉션
             return "redirect:/members/login";
         }
+    }
+
+    private String getLoggedInMemberFromCookie(HttpServletRequest request) {
+        Cookie[] cookies = request.getCookies();
+        if (cookies != null) {
+            for (Cookie cookie : cookies) {
+                if ("loggedInMember".equals(cookie.getName())) {
+                    return cookie.getValue();
+                }
+            }
+        }
+        return null;
     }
 }
