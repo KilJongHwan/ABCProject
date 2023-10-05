@@ -305,14 +305,13 @@
 <main>
     <section class="post-list">
         <h2>게시물 수정</h2>
-        <form action="/main/edit/{postId}/complete" method="post">
-            <div class="form-group">
+        <form th:action="@{'/main/edit/' + ${post.id} + '/complete'}" method="post">
                 <label for="newTitle">제목</label>
                 <input type="text" id="newTitle" name="newTitle" th:value="${post.title}" required>
             </div>
             <div class="form-group">
                 <label for="newContent">내용</label>
-                <textarea id="newContent" name="newContent" required>${post.content}</textarea>
+                <textarea id="newContent" name="newContent" required></textarea>
             </div>
             <input type="hidden" name="postId" th:value="${post.id}">
             <button type="submit">수정하기</button>

@@ -66,6 +66,7 @@ public class PostController {
         // 게시물 작성자와 로그인한 사용자가 같은 경우에만 수정 페이지로 이동
         if (post != null && loggedInMember.equals(post.getMembersID())) {
             model.addAttribute("post", post);
+            model.addAttribute("loggedInMember", loggedInMember);
             return "modifypost";
         } else {
             return "redirect:/main/post/" + postId;
@@ -73,8 +74,8 @@ public class PostController {
     }
     @PostMapping("/edit/{postId}/complete")
     public String editComplete(@RequestParam("postId") int postId,
-                               @RequestParam("title") String title,
-                               @RequestParam("content") String content,
+                               @RequestParam("newTitle") String title,
+                               @RequestParam("newContent") String content,
                                HttpServletRequest request, Model model) {
         String loggedInMember = getLoggedInMemberFromCookie(request);
 
@@ -85,10 +86,11 @@ public class PostController {
         model.addAttribute("post", updatedPost);
         model.addAttribute("title", updatedPost.getTitle());
         model.addAttribute("content", updatedPost.getContent());
+        model.addAttribute("loggedInMember",loggedInMember);
 
-        return "selectrst";
+        return "redirect:/main/post";
+
     }
-
 
 
     @PostMapping("/add/comment")
