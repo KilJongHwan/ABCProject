@@ -1,132 +1,136 @@
 package com.abc.jdbc.dao;
 
-import com.abc.jdbc.dto.CommentsDTO;
-import com.abc.jdbc.util.DatabaseConnection;
-
-import java.sql.*;
+import java.io.IOException;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.InputMismatchException;
 import java.util.List;
 import java.util.Scanner;
 
+import com.abc.jdbc.dto.MembersDTO;
+import com.abc.jdbc.main.MainApplication;
+import com.abc.jdbc.util.Animation;
+import com.abc.jdbc.util.DatabaseConnection;
+import com.abc.jdbc.dto.CommentsDTO;
+
 public class CommentsDAO {
-    Connection conn = null;
-    Statement st = null;
-    PreparedStatement pst = null;
+    // 연결
+    private final Connection connection;
     Scanner sc = new Scanner(System.in);
 
-    public List<CommentsDTO> whatsPost(int postId) {
-        List<CommentsDTO> comments = new ArrayList<>();
-        try {
-            conn = DatabaseConnection.getConnection();
-            String sql = "SELECT C.ID AS COMMENT_ID, C.COMMENTSTEXT, C.COMMENTSTIME FROM COMMENTS C WHERE C.POSTSID = ?";
-            pst = conn.prepareStatement(sql);
-            pst.setInt(1, postId);
+    public CommentsDAO() {
+        connection = DatabaseConnection.getConnection();
+    }
 
-            ResultSet rs = pst.executeQuery();
-
-            while (rs.next()) {
-                int commentId = rs.getInt("COMMENT_ID");
-                String commentText = rs.getString("COMMENTSTEXT");
-                Date commentTime = rs.getDate("COMMENTSTIME");
-
-                CommentsDTO comment = new CommentsDTO(commentId, commentText, commentTime);
-                comments.add(comment);
-            }
+    // 댓글 달기
+    public void addComment(CommentsDTO commentsDTO) {
+        String sql = "INSERT INTO COMMENTS (POSTSID, MEMBERSID, COMMENTSTEXT) VALUES (?, ?, ?)";
+        try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
+            preparedStatement.setString(1, commentsDTO.getPostsId());
+            preparedStatement.setString(2, commentsDTO.getMembersId());
+            preparedStatement.setString(3, commentsDTO.getCommentsText());
+            preparedStatement.executeUpdate();
+            Animation.loading();
+            System.out.println("댓글을 작성했습니다.");
+            Animation.waitMoment();
         } catch (Exception e) {
-            e.printStackTrace();
+            System.out.println("CommentsDAO addComment Error! : " + e);
         }
-
-        return comments;
     }
 
-    public void printCommentsByPostId(int postId, int memberId) {
-        List<CommentsDTO> comments = whatsPost(postId);
-        String name = "";
-        if (comments.isEmpty()) {
-            System.out.println("해당 게시글에 댓글이 없습니다.");
-        } else {
-            try {
-                conn = DatabaseConnection.getConnection();
-                String sql = "SELECT NAME FROM MEMBERS WHERE ID = ?";
-                pst = conn.prepareStatement(sql);
-                pst.setInt(1, memberId);
-                ResultSet rs = pst.executeQuery();
-                while (rs.next()) {
-                    name = rs.getString("NAME");
+    // 댓글 보기
+    public List<CommentsDTO> getCommentsByPostId(CommentsDTO commentsDTO) {
+        List<CommentsDTO> commentsList = new ArrayList<>();
+        String sql = "SELECT ID, NAME, COMMENTSTEXT, COMMENTSTIME FROM COMMENTS WHERE POSTSID = ?";
+        try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
+            preparedStatement.setString(1, commentsDTO.getPostsId());
+            ResultSet resultSet = preparedStatement.executeQuery();
+            while (resultSet.next()) {
+                CommentsDTO comment = new CommentsDTO();
+                comment.setId(resultSet.getString("ID"));
+                comment.setName(resultSet.getString("NAME"));
+                comment.setCommentsText(resultSet.getString("COMMENTSTEXT"));
+                comment.setCommentsTime(String.valueOf(resultSet.getTimestamp("COMMENTSTIME")));
+                commentsList.add(comment);
+            }
+
+            if (commentsList.isEmpty()) {
+                System.out.println(commentsDTO.getPostsId() + "번 게시글에 댓글이 없습니다.");
+                Animation.waitMoment();
+            } else {
+                System.out.println("<" + commentsDTO.getPostsId() + "번 게시글의 댓글 목록>");
+                for (CommentsDTO comment : commentsList) {
+                    System.out.println("댓글 번호 : " + comment.getId());
+                    System.out.println("댓글 작성자 : " + comment.getName());
+                    System.out.println("댓글 내용: " + comment.getCommentsText());
+                    System.out.println("댓글 시간: " + comment.getCommentsTime());
+                    System.out.println();
                 }
-                DatabaseConnection.close(conn);
-                DatabaseConnection.close(pst);
-            } catch (Exception e) {
-                e.printStackTrace();
+                Animation.waitMoment();
             }
-            System.out.println("게시글 #" + postId + "의 댓글 목록:");
-            for (CommentsDTO comment : comments) {
-                System.out.println("댓글 닉네임: " + name);
-                System.out.println("댓글 번호: " + comment.getId());
-                System.out.println("댓글 내용: " + comment.getCommentsText());
-                System.out.println("댓글 작성 시간: " + comment.getCurrentTime());
-                System.out.println("-------------");
-            }
+        } catch (SQLException e) {
+            System.out.println("SQL 오류 발생: " + e.getMessage());
+        } catch (Exception e) {
+            System.out.println("오류 발생: " + e.getMessage());
         }
+        return commentsList;
     }
 
-    //    public void commentModify() {
-//        String sql = "UPDATE COMMENTS SET COMMENTSTEXT = ? WHERE ID = ?";
-//        try {
-//            conn = DatabaseConnection.getConnection();
-//            pst = conn.prepareStatement(sql);
-//
-//            System.out.print("수정할 댓글 번호를 선택하세요: ");
-//            int modCommentId = sc.nextInt();
-//            System.out.print("수정할 내용을 입력하세요: ");
-//            String modComment = sc.next();
-//            sc.nextLine();
-//            pst.setString(1, modComment);
-//            pst.setInt(2, modCommentId);
-//            int rowsUpdated = pst.executeUpdate();
-//
-//            if (rowsUpdated > 0) {
-//                System.out.println("댓글이 성공적으로 수정되었습니다.");
-//            } else {
-//                System.out.println("댓글 수정에 실패했습니다.");
-//            }
-//        } catch (Exception e) {
-//            System.out.println("댓글 수정 오류: " + e);
-//        } finally {
-//            DatabaseConnection.close(pst);
-//            DatabaseConnection.close(conn);
-//        }
-//    }
-    public void commentModify() {
-        String sql = "UPDATE COMMENTS SET COMMENTSTEXT = ? WHERE ID = ?";
-        conn = DatabaseConnection.getConnection();
-        try (PreparedStatement preparedStatement = conn.prepareStatement(sql)) {
+    // 댓글 수정
+    public void commentModify(MembersDTO membersDTO, int postid) {
+        String sql = "UPDATE COMMENTS SET COMMENTSTEXT = ? WHERE ID = ? AND MEMBERSID = ? AND POSTSID = ?";
+        try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
             System.out.print("수정할 댓글 번호를 선택하세요: ");
-            int modCommentId = sc.nextInt();
-            sc.nextLine(); // 줄 바꿈 문자 처리
+            int modCommentId;
+            try {
+                modCommentId = sc.nextInt();
+            } catch (InputMismatchException e) {
+                System.out.println("올바른 숫자를 입력해주세요.\n해당 번호의 댓글은 존재하지 않습니다.");
 
-            System.out.println("수정할 내용을 입력하세요 (입력 완료 후 Enter를 누르세요): ");
-            StringBuilder modCommentBuilder = new StringBuilder();
-            String line;
+                return;
+            }
+            sc.nextLine(); // 버퍼 비우기
 
-            while (true) {
-                line = sc.nextLine();
-                if (line.isEmpty()) {
-                    break; // Enter 키 입력 시 루프 탈출
-                }
-                modCommentBuilder.append(line).append("\n");
+            // 댓글이 존재하는지 확인
+            if (!isCommentExists(modCommentId)) {
+                System.out.println("해당 댓글이 존재하지 않습니다.");
+                return;
             }
 
-            String modComment = modCommentBuilder.toString().trim(); // 입력 내용을 가져오고 공백 제거
+            // 댓글 작성자의 MembersID를 호출
+            int commentAuthorId = getCommentAuthorId(modCommentId);
+            // 댓글 작성자와 현재 로그인한 사용자를 비교
+            if (commentAuthorId != Integer.parseInt(membersDTO.getId())) {
+                System.out.println("본인이 작성한 댓글만 수정할 수 있습니다.");
+                return; // 다른 작성자의 댓글을 수정하려고 시도한 경우
+            }
 
+            int commentPostId = getCommentPostId(modCommentId);
+            if (commentPostId != postid) {
+                System.out.println("해당 게시글에는 해당 댓글이 존재하지 않습니다.");
+                Animation.waitMoment();
+                return;
+            }
+
+            System.out.print("수정할 내용을 입력하세요: ");
+            String modComment = sc.nextLine();
             preparedStatement.setString(1, modComment);
             preparedStatement.setInt(2, modCommentId);
-            int rowsUpdated = preparedStatement.executeUpdate();
+            preparedStatement.setInt(3, commentAuthorId);
+            preparedStatement.setInt(4, commentPostId);
 
+            int rowsUpdated = preparedStatement.executeUpdate();
             if (rowsUpdated > 0) {
+                Animation.loading();
                 System.out.println("댓글이 성공적으로 수정되었습니다.");
+                Animation.waitMoment();
             } else {
+                Animation.loading();
                 System.out.println("댓글 수정에 실패했습니다.");
+                Animation.waitMoment();
             }
         } catch (Exception e) {
             System.out.println("CommentDAO commentModify: " + e);
@@ -134,65 +138,86 @@ public class CommentsDAO {
     }
 
 
-
-    public List<CommentsDTO> postList() {
-        List<CommentsDTO> list = new ArrayList<>();
-        try {
-            conn = DatabaseConnection.getConnection();
-            st = conn.createStatement();
-
-            // 댓글 데이터 조회 쿼리 작성
-            String sql = "SELECT ID, POSTSID, MEMBERSID, COMMENTSTEXT, COMMENTSTIME FROM COMMENTS";
-            ResultSet rs = st.executeQuery(sql);
-
-            while (rs.next()) {
-                int id = rs.getInt("ID");
-                int postId = rs.getInt("POSTSID");
-                int memberId = rs.getInt("MEMBERSID");
-                String commentText = rs.getString("COMMENTSTEXT");
-                Date commentsTime = rs.getDate("COMMENTSTIME");
-
-                // CommentsDTO 객체 생성 후 리스트에 추가
-                CommentsDTO comment = new CommentsDTO(id, postId, memberId, commentText, commentsTime);
-                list.add(comment);
-
-                // 콘솔 출력
-                System.out.println("ID: " + id + ", PostID: " + postId + ", MemberID: " + memberId + ", Comment: " + commentText + "Time: " + commentsTime);
-            }
+    // 댓글이 존재하는지 확인하는 메서드
+    private boolean isCommentExists(int commentId) {
+        String sql = "SELECT 1 FROM COMMENTS WHERE ID = ?";
+        try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
+            preparedStatement.setInt(1, commentId);
+            ResultSet resultSet = preparedStatement.executeQuery();
+            return resultSet.next();
         } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            DatabaseConnection.close(conn);
-            DatabaseConnection.close(st);
+            System.out.println("Error in isCommentExists: " + e);
+            return false;
         }
-        return list;
     }
 
-    public void commentWrite(int pid, int mid) {
-        try {
-            System.out.print("작성할 댓글을 입력하세요: ");
-            String comment = sc.nextLine(); // 댓글을 공백을 포함한 전체 라인으로 입력받음
 
-            String w = "INSERT INTO COMMENTS(POSTSID, MEMBERSID, COMMENTSTEXT) VALUES (?, ?, ?)";
-            conn = DatabaseConnection.getConnection();
-            pst = conn.prepareStatement(w);
-            pst.setInt(1, pid);
-            pst.setInt(2, mid);
-            pst.setString(3, comment);
-
-            int rowsInserted = pst.executeUpdate();
-
-            if (rowsInserted > 0) {
-                System.out.println("댓글이 성공적으로 작성되었습니다.");
-            } else {
-                System.out.println("댓글 작성에 실패했습니다.");
+    // 댓글 작성자의 MembersID를 호출하는 함수(댓글 수정 함수에서 사용)
+    private int getCommentAuthorId(int commentId) {
+        String sql = "SELECT MEMBERSID FROM COMMENTS WHERE ID = ?";
+        try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
+            preparedStatement.setInt(1, commentId);
+            ResultSet resultSet = preparedStatement.executeQuery();
+            if (resultSet.next()) {
+                return resultSet.getInt("MEMBERSID");
             }
         } catch (Exception e) {
-            System.err.println("댓글 작성 오류: " + e.getMessage());
-            e.printStackTrace();
-        } finally {
-            DatabaseConnection.close(pst);
-            DatabaseConnection.close(conn);
+            System.out.println("Error in getCommentAuthorId: " + e);
+        }
+        return -1; // 작성자 ID를 찾지 못한 경우 -1을 반환
+    }
+
+    // 댓글이 달린 게시글의 PostsId를 호출하는 함수(댓글 수정 함수에서 사용)
+    private int getCommentPostId(int commentId){
+        String sql = "SELECT POSTSID FROM COMMENTS WHERE ID=?";
+        try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
+            preparedStatement.setInt(1, commentId);
+            ResultSet resultSet = preparedStatement.executeQuery();
+            if (resultSet.next()) {
+                return resultSet.getInt("POSTSID");
+            }
+        } catch (Exception e) {
+            System.out.println("Error in getCommentPostId: " + e);
+        }
+        return -1; // 작성자 ID를 찾지 못한 경우 -1을 반환
+    }
+
+    // 댓글 삭제
+    public void commentDelete(CommentsDTO commentsDTO){
+        String sql = "DELETE FROM COMMENTS WHERE ID = ?";
+        try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
+            System.out.print("삭제할 댓글 번호를 입력해주세요 : ");
+            int id =  sc.nextInt();
+            commentsDTO.setId(String.valueOf(id));
+            preparedStatement.setString(1, commentsDTO.getId());
+            int rowsAffected = preparedStatement.executeUpdate();
+            if (rowsAffected == 0) {
+                System.out.println("해당 번호의 댓글이 존재하지 않습니다.");
+            } else {
+                Animation.loading();
+                System.out.println("댓글이 성공적으로 삭제되었습니다.");
+                Animation.waitMoment();
+            }
+        } catch (Exception e) {
+            System.out.println("CommentDAO commentDelete : " + e);
+        }
+    }
+
+    // 출력문을 호출하는 메서드 추가
+    public void printComments(List<CommentsDTO> commentsList) throws IOException, InterruptedException {
+        if (commentsList.isEmpty()) {
+            System.out.println("댓글이 없습니다.");
+            Animation.waitMoment();
+
+        } else {
+            System.out.println("<댓글 목록>");
+            for (CommentsDTO comment : commentsList) {
+                System.out.println("댓글 번호 : " + comment.getId());
+                System.out.println("댓글 작성자 : " + comment.getName());
+                System.out.println("댓글 내용: " + comment.getCommentsText());
+                System.out.println("댓글 시간: " + comment.getCommentsTime());
+                System.out.println();
+            }
         }
     }
 }

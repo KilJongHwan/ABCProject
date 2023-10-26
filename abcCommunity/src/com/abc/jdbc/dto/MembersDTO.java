@@ -10,6 +10,11 @@ public class MembersDTO {
 
     }
 
+    public MembersDTO(String id, String password) {
+        this.id = id;
+        this.password = password;
+    }
+
     public MembersDTO(String inputId, String password, String name) {
         this.inputId = inputId;
         this.password = password;

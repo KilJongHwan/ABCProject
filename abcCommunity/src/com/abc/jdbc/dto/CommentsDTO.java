@@ -1,67 +1,74 @@
 package com.abc.jdbc.dto;
 
-import java.sql.Clob;
-import java.sql.Date;
-
 public class CommentsDTO {
-    private int id;
-    private int postId;
-    private int memberId;
+    private String id;
+    private String postsId;
+    private String membersId;
     private String commentsText;
-    private Date currentTime;
+    private String commentsTime;
+    private String name;
 
-    public  CommentsDTO(){}
-    public CommentsDTO(int id, int postId, int memberId, String commentsText, Date currentTime) {
-        this.id = id;
-        this.postId = postId;
-        this.memberId = memberId;
+    public CommentsDTO() {
+    }
+
+
+    public CommentsDTO(String postsId, String membersId, String commentsText, String name) {
+        this.postsId = postsId;
+        this.membersId = membersId;
         this.commentsText = commentsText;
-        this.currentTime = currentTime;
+        this.name = name;
     }
 
-    public CommentsDTO(int commentId, String commentText, Date currentTime) {
-        this.id = commentId;
-        this.commentsText = commentText;
-        this.currentTime = currentTime;
+    public CommentsDTO(String postsId, String membersId) {
+        this.postsId = postsId;
+        this.membersId = membersId;
     }
 
-    public int getId() {
+    public String getId() {
         return id;
     }
 
-    public void setId(int id) {
-        this.id = id;
+    public String getPostsId() {
+        return postsId;
     }
 
-    public int getPostId() {
-        return postId;
-    }
-
-    public void setPostId(int postId) {
-        this.postId = postId;
-    }
-
-    public int getMemberId() {
-        return memberId;
-    }
-
-    public void setMemberId(int memberId) {
-        this.memberId = memberId;
+    public String getMembersId() {
+        return membersId;
     }
 
     public String getCommentsText() {
         return commentsText;
     }
 
+    public String getCommentsTime() {
+        return commentsTime;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public void setPostsId(String postsId) {
+        this.postsId = postsId;
+    }
+
+    public void setMembersId(String membersId) {
+        this.membersId = membersId;
+    }
+
     public void setCommentsText(String commentsText) {
         this.commentsText = commentsText;
     }
 
-    public Date getCurrentTime() {
-        return currentTime;
+    public void setCommentsTime(String commentsTime) {
+        this.commentsTime = commentsTime;
     }
 
-    public void setCurrentTime(Date currentTime) {
-        this.currentTime = currentTime;
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 }
